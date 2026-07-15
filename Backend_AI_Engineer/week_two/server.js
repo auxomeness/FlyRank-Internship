@@ -3,11 +3,14 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
+app.use(express.json());
+
 const tasks = [
   { id: 1, title: 'Learn Express basics', done: true },
   { id: 2, title: 'Build a CRUD API', done: false },
   { id: 3, title: 'Test endpoints with curl', done: false }
 ];
+let nextTaskId = 4;
 
 app.get('/', (req, res) => {
   res.json({
@@ -38,6 +41,27 @@ app.get('/tasks/:id', (req, res) => {
   }
 
   res.json(task);
+});
+
+app.post('/tasks', (req, res) => {
+  const title = req.body.title;
+
+  if (typeof title !== 'string' || title.trim() === '') {
+    return res.status(400).json({
+      error: 'Title is required and must not be empty'
+    });
+  }
+
+  const task = {
+    id: nextTaskId,
+    title: title.trim(),
+    done: false
+  };
+
+  nextTaskId += 1;
+  tasks.push(task);
+
+  res.status(201).json(task);
 });
 
 app.listen(PORT, () => {
