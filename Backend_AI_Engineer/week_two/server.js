@@ -1,9 +1,12 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const openApiDocument = require('./openapi.json');
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 const tasks = [
   { id: 1, title: 'Learn Express basics', done: true },
