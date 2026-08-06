@@ -17,7 +17,13 @@ function findById(id) {
   return row ? toTask(row) : null;
 }
 
+function create(title) {
+  const result = db.prepare('INSERT INTO tasks (title, done) VALUES (?, 0)').run(title);
+  return findById(result.lastInsertRowid);
+}
+
 module.exports = {
   list,
-  findById
+  findById,
+  create
 };
