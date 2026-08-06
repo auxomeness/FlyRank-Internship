@@ -1,7 +1,7 @@
 {
-  "name": "week-three-task-api-postgres",
+  "name": "week-three-task-api-sqlite",
   "version": "1.0.0",
-  "description": "Week 3 Task API backed by Postgres in Docker",
+  "description": "Week 3 Task API backed by SQLite",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js"
@@ -9,9 +9,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "dotenv": "^17.2.3",
+    "better-sqlite3": "^12.2.0",
     "express": "^5.2.1",
-    "pg": "^8.16.3",
     "swagger-ui-express": "^5.0.1"
   }
 }
