@@ -22,8 +22,35 @@ function create(title) {
   return findById(result.lastInsertRowid);
 }
 
+function update(id, changes) {
+  const fields = [];
+  const values = [];
+
+  if (Object.prototype.hasOwnProperty.call(changes, 'title')) {
+    fields.push('title = ?');
+    values.push(changes.title);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(changes, 'done')) {
+    fields.push('done = ?');
+    values.push(changes.done ? 1 : 0);
+  }
+
+  values.push(id);
+
+  const result = db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+  return result.changes > 0 ? findById(id) : null;
+}
+
+function remove(id) {
+  const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
 module.exports = {
   list,
   findById,
-  create
+  create,
+  update,
+  remove
 };
