@@ -3,7 +3,7 @@
   "info": {
     "title": "Task API",
     "version": "1.0",
-    "description": "A CRUD API for managing to-do tasks stored in Postgres."
+    "description": "A CRUD API for managing to-do tasks stored in SQLite."
   },
   "servers": [
     {
