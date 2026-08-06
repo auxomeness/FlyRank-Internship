@@ -3,7 +3,7 @@ const swaggerUi = require('swagger-ui-express');
 const openApiDocument = require('../openapi.json');
 const { createTaskRouter } = require('./routes/taskRoutes');
 const { createTaskService } = require('./services/taskService');
-const taskRepository = require('./repositories/postgresTaskRepository');
+const taskRepository = require('./repositories/sqliteTaskRepository');
 
 function createApp() {
   const app = express();
