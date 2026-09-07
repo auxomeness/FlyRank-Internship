@@ -1,4 +1,6 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const openApiDocument = require('../openapi.json');
 const { createAuthRouter } = require('./routes/authRoutes');
 const { createProtectedRouter } = require('./routes/protectedRoutes');
 const { createPublicRouter } = require('./routes/publicRoutes');
@@ -9,6 +11,7 @@ function createApp(supabase) {
   const authMiddleware = requireAuth(supabase);
 
   app.use(express.json());
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
   app.get('/', (req, res) => {
     res.json({
