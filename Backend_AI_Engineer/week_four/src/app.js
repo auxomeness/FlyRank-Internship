@@ -1,5 +1,7 @@
 const express = require('express');
 const { createAuthRouter } = require('./routes/authRoutes');
+const { createProtectedRouter } = require('./routes/protectedRoutes');
+const { createPublicRouter } = require('./routes/publicRoutes');
 
 function createApp(supabase) {
   const app = express();
@@ -21,6 +23,8 @@ function createApp(supabase) {
   });
 
   app.use(createAuthRouter(supabase));
+  app.use(createPublicRouter());
+  app.use(createProtectedRouter());
 
   app.use((err, req, res, next) => {
     if (err.statusCode) {
