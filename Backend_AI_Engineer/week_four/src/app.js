@@ -24,7 +24,7 @@ function createApp(supabase) {
 
   app.use(createAuthRouter(supabase));
   app.use(createPublicRouter());
-  app.use(createProtectedRouter());
+  app.use(createProtectedRouter(supabase));
 
   app.use((err, req, res, next) => {
     if (err.statusCode) {
