@@ -9,6 +9,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const CACHE_DIR = path.join(ROOT_DIR, 'cache');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'output');
 const FIRST_CATALOGUE_URL = 'https://books.toscrape.com/catalogue/page-1.html';
+const FAKE_BOOK_URL = 'https://books.toscrape.com/catalogue/this-page-is-deliberately-broken-for-stage-5/index.html';
 const REAL_REQUEST_DELAY_MS = 650;
 
 const bookSchema = z.object({
@@ -79,27 +80,50 @@ async function fetchWithTimeout(url) {
   }
 }
 
+function shouldRetry(error) {
+  return error.name === 'AbortError' || /status 5\d\d/.test(error.message);
+}
+
 async function writeJson(filePath, value) {
   await ensureDirectory(path.dirname(filePath));
   await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-async function getCachedHtml(url, filePath) {
+async function getCachedHtml(url, filePath, report) {
   await ensureDirectory(path.dirname(filePath));
 
   const cached = await readCachedFile(filePath);
 
   if (cached) {
     console.log(`CACHE HIT ${url} bytes=${Buffer.byteLength(cached)}`);
+    report.cache_hits += 1;
     return cached;
   }
 
-  console.log(`FETCH ${url}`);
-  const html = await fetchWithTimeout(url);
-  await sleep(REAL_REQUEST_DELAY_MS);
-  await fs.writeFile(filePath, html);
-  console.log(`SAVED ${filePath} bytes=${Buffer.byteLength(html)}`);
-  return html;
+  let lastError;
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      console.log(`FETCH ${url} attempt=${attempt}`);
+      const html = await fetchWithTimeout(url);
+      await sleep(REAL_REQUEST_DELAY_MS);
+      await fs.writeFile(filePath, html);
+      report.pages_fetched += 1;
+      console.log(`SAVED ${filePath} bytes=${Buffer.byteLength(html)}`);
+      return html;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === 1 && shouldRetry(error)) {
+        await sleep(1000);
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError;
 }
 
 function extractBookLinks(html, pageUrl) {
@@ -201,14 +225,14 @@ function validateRecords(rawRecords) {
   };
 }
 
-async function discoverBookUrls(maxCataloguePages = 3) {
+async function discoverBookUrls(report, maxCataloguePages = 3) {
   const cataloguePages = [];
   const discoveredUrls = [];
   let nextUrl = FIRST_CATALOGUE_URL;
 
   while (nextUrl && cataloguePages.length < maxCataloguePages) {
     const pageNumber = cataloguePageNumber(nextUrl);
-    const html = await getCachedHtml(nextUrl, cachePathForCataloguePage(pageNumber));
+    const html = await getCachedHtml(nextUrl, cachePathForCataloguePage(pageNumber), report);
     cataloguePages.push(nextUrl);
     discoveredUrls.push(...extractBookLinks(html, nextUrl));
     nextUrl = extractNextPageUrl(html, nextUrl);
@@ -223,13 +247,13 @@ async function discoverBookUrls(maxCataloguePages = 3) {
   };
 }
 
-async function extractRawRecords() {
-  const result = await discoverBookUrls();
+async function extractRawRecords(report, includeBadUrl = true) {
+  const result = await discoverBookUrls(report);
   const sourceByBookUrl = new Map();
 
   for (const cataloguePageUrl of result.cataloguePages) {
     const pageNumber = cataloguePageNumber(cataloguePageUrl);
-    const html = await getCachedHtml(cataloguePageUrl, cachePathForCataloguePage(pageNumber));
+    const html = await getCachedHtml(cataloguePageUrl, cachePathForCataloguePage(pageNumber), report);
 
     for (const bookUrl of extractBookLinks(html, cataloguePageUrl)) {
       sourceByBookUrl.set(bookUrl, cataloguePageUrl);
@@ -237,17 +261,25 @@ async function extractRawRecords() {
   }
 
   const records = [];
+  const urlsToVisit = includeBadUrl ? [...result.uniqueUrls, FAKE_BOOK_URL] : result.uniqueUrls;
 
-  for (const productUrl of result.uniqueUrls) {
-    const html = await getCachedHtml(productUrl, cachePathForBookUrl(productUrl));
-    records.push(
-      extractRawBookRecord(
-        html,
-        productUrl,
-        sourceByBookUrl.get(productUrl),
-        new Date().toISOString()
-      )
-    );
+  for (const productUrl of urlsToVisit) {
+    try {
+      const html = await getCachedHtml(productUrl, cachePathForBookUrl(productUrl), report);
+      records.push(
+        extractRawBookRecord(
+          html,
+          productUrl,
+          sourceByBookUrl.get(productUrl) || 'stage-5-deliberate-failure',
+          new Date().toISOString()
+        )
+      );
+    } catch (error) {
+      report.failed_pages.push({
+        url: productUrl,
+        reason: error.message
+      });
+    }
   }
 
   return {
@@ -257,11 +289,27 @@ async function extractRawRecords() {
 }
 
 async function main() {
-  const result = await extractRawRecords();
+  const startedAt = new Date();
+  const report = {
+    started_at: startedAt.toISOString(),
+    duration_ms: 0,
+    pages_fetched: 0,
+    cache_hits: 0,
+    valid_records: 0,
+    invalid_records: 0,
+    failed_pages: []
+  };
+  const includeBadUrl = !process.argv.includes('--no-bad-url');
+  const result = await extractRawRecords(report, includeBadUrl);
   const { validRecords, invalidRecords } = validateRecords(result.rawRecords);
+
+  report.duration_ms = Date.now() - startedAt.getTime();
+  report.valid_records = validRecords.length;
+  report.invalid_records = invalidRecords.length;
 
   await writeJson(path.join(OUTPUT_DIR, 'books.json'), validRecords);
   await writeJson(path.join(OUTPUT_DIR, 'errors.json'), invalidRecords);
+  await writeJson(path.join(OUTPUT_DIR, 'run-report.json'), report);
 
   console.log(`catalogue_pages=${result.cataloguePages.length}`);
   console.log(`discovered=${result.discoveredUrls.length}`);
@@ -269,6 +317,8 @@ async function main() {
   console.log(`detail_pages=${result.rawRecords.length}`);
   console.log(`valid_records=${validRecords.length}`);
   console.log(`invalid_records=${invalidRecords.length}`);
+  console.log(`failed_pages=${report.failed_pages.length}`);
+  console.log(`duration_ms=${report.duration_ms}`);
   console.log(JSON.stringify(validRecords[0], null, 2));
 }
 
