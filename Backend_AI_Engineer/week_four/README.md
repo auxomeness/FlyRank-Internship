@@ -6,13 +6,15 @@ The backend never stores passwords and never hashes passwords itself. Supabase m
 
 ## Setup
 
-Create a Supabase project, then copy the project URL and anon key from Supabase Dashboard -> Project Settings -> API.
+Create a Supabase project, then copy the project URL and publishable key from Supabase Dashboard -> Project Settings -> API.
 
 Turn off email confirmation for this practice assignment:
 
 ```text
 Authentication -> Sign In / Providers -> Email -> Confirm email: off
 ```
+
+If signup returns `201` but login still returns `401`, email confirmation is probably still enabled in Supabase. Turn it off, create a new test user, then log in again.
 
 Create your local environment file:
 
@@ -24,7 +26,7 @@ Fill in `.env`:
 
 ```env
 SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_or_anon_key
 PORT=3000
 ```
 

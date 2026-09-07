@@ -12,7 +12,11 @@ function requireEnv(name) {
 
 function createSupabaseClient() {
   const supabaseUrl = requireEnv('SUPABASE_URL');
-  const supabaseKey = requireEnv('SUPABASE_KEY');
+  const supabaseKey = process.env.SUPABASE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseKey) {
+    throw new Error('SUPABASE_KEY or SUPABASE_PUBLISHABLE_KEY is required. Copy .env.example to .env and set a real value.');
+  }
 
   return createClient(supabaseUrl, supabaseKey, {
     auth: {
