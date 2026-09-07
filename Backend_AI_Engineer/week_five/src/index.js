@@ -1,13 +1,27 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const cheerio = require('cheerio');
+const { z } = require('zod');
 
 const USER_AGENT = 'FlyRankInternship-A9/1.0 (+https://github.com/auxomeness/FlyRank-Internship)';
 const REQUEST_TIMEOUT_MS = 8000;
 const ROOT_DIR = path.resolve(__dirname, '..');
 const CACHE_DIR = path.join(ROOT_DIR, 'cache');
+const OUTPUT_DIR = path.join(ROOT_DIR, 'output');
 const FIRST_CATALOGUE_URL = 'https://books.toscrape.com/catalogue/page-1.html';
 const REAL_REQUEST_DELAY_MS = 650;
+
+const bookSchema = z.object({
+  title: z.string().min(1),
+  product_url: z.string().url().startsWith('https://'),
+  price_text: z.string().min(1),
+  price_gbp: z.number().nonnegative(),
+  availability_text: z.string().min(1),
+  rating_text: z.enum(['One', 'Two', 'Three', 'Four', 'Five']),
+  description: z.string().min(1).nullable(),
+  source_page: z.string().url().startsWith('https://'),
+  fetched_at: z.string().datetime()
+});
 
 async function ensureDirectory(directoryPath) {
   await fs.mkdir(directoryPath, { recursive: true });
@@ -63,6 +77,11 @@ async function fetchWithTimeout(url) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function writeJson(filePath, value) {
+  await ensureDirectory(path.dirname(filePath));
+  await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 async function getCachedHtml(url, filePath) {
@@ -139,6 +158,49 @@ function extractRawBookRecord(html, productUrl, sourcePage, fetchedAt) {
   };
 }
 
+function normalizePrice(priceText) {
+  const cleaned = priceText.replace('£', '').trim();
+  const price = Number(cleaned);
+
+  if (!Number.isFinite(price)) {
+    return Number.NaN;
+  }
+
+  return price;
+}
+
+function normalizeRecord(rawRecord) {
+  return {
+    ...rawRecord,
+    price_gbp: normalizePrice(rawRecord.price_text)
+  };
+}
+
+function validateRecords(rawRecords) {
+  const recordsByUrl = new Map();
+  const errors = [];
+
+  for (const rawRecord of rawRecords) {
+    const normalizedRecord = normalizeRecord(rawRecord);
+    const result = bookSchema.safeParse(normalizedRecord);
+
+    if (!result.success) {
+      errors.push({
+        product_url: rawRecord.product_url,
+        reason: result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ')
+      });
+      continue;
+    }
+
+    recordsByUrl.set(result.data.product_url, result.data);
+  }
+
+  return {
+    validRecords: [...recordsByUrl.values()],
+    invalidRecords: errors
+  };
+}
+
 async function discoverBookUrls(maxCataloguePages = 3) {
   const cataloguePages = [];
   const discoveredUrls = [];
@@ -196,12 +258,18 @@ async function extractRawRecords() {
 
 async function main() {
   const result = await extractRawRecords();
+  const { validRecords, invalidRecords } = validateRecords(result.rawRecords);
+
+  await writeJson(path.join(OUTPUT_DIR, 'books.json'), validRecords);
+  await writeJson(path.join(OUTPUT_DIR, 'errors.json'), invalidRecords);
 
   console.log(`catalogue_pages=${result.cataloguePages.length}`);
   console.log(`discovered=${result.discoveredUrls.length}`);
   console.log(`unique_urls=${result.uniqueUrls.length}`);
   console.log(`detail_pages=${result.rawRecords.length}`);
-  console.log(JSON.stringify(result.rawRecords[0], null, 2));
+  console.log(`valid_records=${validRecords.length}`);
+  console.log(`invalid_records=${invalidRecords.length}`);
+  console.log(JSON.stringify(validRecords[0], null, 2));
 }
 
 main().catch((error) => {
