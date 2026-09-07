@@ -1,0 +1,14 @@
+{
+  "started_at": "2026-09-07T15:03:25.217Z",
+  "duration_ms": 936,
+  "pages_fetched": 0,
+  "cache_hits": 66,
+  "valid_records": 60,
+  "invalid_records": 0,
+  "failed_pages": [
+    {
+      "url": "https://books.toscrape.com/catalogue/this-page-is-deliberately-broken-for-stage-5/index.html",
+      "reason": "Fetch failed with status 404"
+    }
+  ]
+}
