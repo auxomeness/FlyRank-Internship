@@ -1,0 +1,42 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#FAFAFA"/>
+  <text x="80" y="82" fill="#111827" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">Portfolio Sitemap Sketch</text>
+  <text x="80" y="118" fill="#4B5563" font-family="Inter, Arial, sans-serif" font-size="18">One person lands, believes the proof, then views GitHub or contacts me.</text>
+
+  <rect x="430" y="170" width="340" height="88" rx="10" fill="#111827"/>
+  <text x="600" y="225" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800">Home</text>
+
+  <path d="M600 258V322" stroke="#111827" stroke-width="3"/>
+  <path d="M230 322H970" stroke="#111827" stroke-width="3"/>
+  <path d="M230 322V382" stroke="#111827" stroke-width="3"/>
+  <path d="M477 322V382" stroke="#111827" stroke-width="3"/>
+  <path d="M723 322V382" stroke="#111827" stroke-width="3"/>
+  <path d="M970 322V382" stroke="#111827" stroke-width="3"/>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="100" y="382" width="260" height="140" rx="10" fill="#FFFFFF" stroke="#111827" stroke-width="3"/>
+    <text x="230" y="432" text-anchor="middle" fill="#111827" font-size="24" font-weight="800">Hero</text>
+    <text x="230" y="466" text-anchor="middle" fill="#4B5563" font-size="15">Name, role, proof</text>
+    <text x="230" y="492" text-anchor="middle" fill="#4B5563" font-size="15">GitHub / contact CTA</text>
+
+    <rect x="347" y="382" width="260" height="190" rx="10" fill="#FFFFFF" stroke="#111827" stroke-width="3"/>
+    <text x="477" y="430" text-anchor="middle" fill="#111827" font-size="24" font-weight="800">Featured Work</text>
+    <text x="477" y="464" text-anchor="middle" fill="#4B5563" font-size="15">APoS</text>
+    <text x="477" y="489" text-anchor="middle" fill="#4B5563" font-size="15">LUMEN</text>
+    <text x="477" y="514" text-anchor="middle" fill="#4B5563" font-size="15">EXPY</text>
+    <text x="477" y="539" text-anchor="middle" fill="#4B5563" font-size="15">CodeGuard AI</text>
+
+    <rect x="593" y="382" width="260" height="140" rx="10" fill="#FFFFFF" stroke="#111827" stroke-width="3"/>
+    <text x="723" y="432" text-anchor="middle" fill="#111827" font-size="24" font-weight="800">About</text>
+    <text x="723" y="466" text-anchor="middle" fill="#4B5563" font-size="15">Short credibility</text>
+    <text x="723" y="492" text-anchor="middle" fill="#4B5563" font-size="15">Backend + UI/UX focus</text>
+
+    <rect x="840" y="382" width="260" height="140" rx="10" fill="#FFFFFF" stroke="#111827" stroke-width="3"/>
+    <text x="970" y="432" text-anchor="middle" fill="#111827" font-size="24" font-weight="800">Contact</text>
+    <text x="970" y="466" text-anchor="middle" fill="#4B5563" font-size="15">GitHub</text>
+    <text x="970" y="492" text-anchor="middle" fill="#4B5563" font-size="15">LinkedIn / email</text>
+  </g>
+
+  <rect x="245" y="628" width="710" height="64" rx="8" fill="#EEF2FF" stroke="#4F46E5" stroke-width="2"/>
+  <text x="600" y="668" text-anchor="middle" fill="#3730A3" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">Change after pressure test: make Featured Work proof-based, not project-name-based.</text>
+</svg>
