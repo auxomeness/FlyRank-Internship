@@ -2,9 +2,11 @@ const express = require('express');
 const { createAuthRouter } = require('./routes/authRoutes');
 const { createProtectedRouter } = require('./routes/protectedRoutes');
 const { createPublicRouter } = require('./routes/publicRoutes');
+const { requireAuth } = require('./middleware/requireAuth');
 
 function createApp(supabase) {
   const app = express();
+  const authMiddleware = requireAuth(supabase);
 
   app.use(express.json());
 
@@ -22,9 +24,9 @@ function createApp(supabase) {
     });
   });
 
-  app.use(createAuthRouter(supabase));
+  app.use(createAuthRouter(supabase, authMiddleware));
   app.use(createPublicRouter());
-  app.use(createProtectedRouter(supabase));
+  app.use(createProtectedRouter(authMiddleware));
 
   app.use((err, req, res, next) => {
     if (err.statusCode) {

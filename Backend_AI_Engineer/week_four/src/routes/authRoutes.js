@@ -21,7 +21,7 @@ function validateCredentials(body) {
   };
 }
 
-function createAuthRouter(supabase) {
+function createAuthRouter(supabase, authMiddleware) {
   const router = express.Router();
 
   router.post(
@@ -59,6 +59,20 @@ function createAuthRouter(supabase) {
       });
     })
   );
+
+  router.post('/auth/logout', authMiddleware, async (req, res, next) => {
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        return next(new AppError(401, 'Invalid or expired token'));
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
 
   return router;
 }
