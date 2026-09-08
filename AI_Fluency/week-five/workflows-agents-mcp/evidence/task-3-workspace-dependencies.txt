@@ -1,0 +1,17 @@
+MCP connector evidence task 3
+
+Tool call:
+mcp__codex_app.load_workspace_dependencies
+
+Why chat alone could not do this:
+A plain chat model cannot inspect the local Codex runtime bundle or know the exact executable paths available on this machine.
+
+Output excerpt:
+Workspace dependencies are available for this local desktop thread.
+
+Bundle version: 26.905.11957
+Git executable: /Users/austin/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback/git
+Node.js executable: /Users/austin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node
+Node.js packages: /Users/austin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules
+Python executable: /Users/austin/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3
+Python packages: /Users/austin/.cache/codex-runtimes/codex-primary-runtime/dependencies/python

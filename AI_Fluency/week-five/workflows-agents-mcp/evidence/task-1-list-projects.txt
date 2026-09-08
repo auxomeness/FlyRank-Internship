@@ -1,0 +1,16 @@
+MCP connector evidence task 1
+
+Tool call:
+mcp__codex_app.list_projects
+
+Why chat alone could not do this:
+A plain chat model cannot inspect local Codex project records or know which local folders are registered as projects.
+
+Output excerpt:
+projects:
+- New project
+  path: /Users/austin/Documents/New project
+  isGitRepository: false
+- ThePILLARS
+  path: /Users/austin/Documents/ThePILLARS
+  isGitRepository: false

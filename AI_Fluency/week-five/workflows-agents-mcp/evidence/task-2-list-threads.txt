@@ -1,0 +1,27 @@
+MCP connector evidence task 2
+
+Tool call:
+mcp__codex_app.list_threads
+
+Why chat alone could not do this:
+A plain chat model cannot read the user's live Codex task list, task status, working directory, or recent task summaries.
+
+Output excerpt:
+threads:
+- id: 019f65ed-25a1-7c92-ab7f-f08c38a41294
+  kind: codex
+  status: active
+  cwd: /Users/austin/Documents/New project
+  title: [ FLYRANK ]
+- title: Polish Message
+  kind: chatgpt
+  status: idle
+- title: Buod ng Akda
+  kind: chatgpt
+  status: idle
+- title: C++ Post Increment Behavior
+  kind: chatgpt
+  status: idle
+- title: Dorm Finder Problems
+  kind: chatgpt
+  status: idle
