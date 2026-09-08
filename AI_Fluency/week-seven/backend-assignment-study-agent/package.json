@@ -1,0 +1,11 @@
+{
+  "name": "backend-assignment-study-agent",
+  "version": "1.0.0",
+  "description": "FL-07 MVP agent that reads assignment material and inspects a project folder to produce a grounded checklist.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/agent.js",
+    "demo": "node src/agent.js --source samples/week-four-auth-source.md --project ../../../Backend_AI_Engineer/week_four --out output/week-four-auth-agent-report.md"
+  },
+  "license": "MIT"
+}
