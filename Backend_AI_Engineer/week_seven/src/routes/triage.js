@@ -2,9 +2,11 @@ import express from "express";
 import {
   createStubTriage,
   formatZodError,
+  PROMPT_VERSION,
   triageInputSchema,
   triageOutputSchema,
 } from "../llm/schema.js";
+import { completeTriageRaw } from "../llm/client.js";
 
 const router = express.Router();
 
@@ -31,15 +33,23 @@ router.post("/triage", async (req, res) => {
       ...output,
       meta: {
         mode: "stub",
-        prompt_version: "triage-v1",
+        prompt_version: PROMPT_VERSION,
         model: "stub",
         repaired: false,
       },
     });
   }
 
-  return res.status(501).json({
-    error: "Real LLM mode is not wired yet. Set LLM_STUB=1 for the Stage 1 checkpoint.",
+  const result = await completeTriageRaw(input.data.message);
+
+  return res.json({
+    raw_model_output: result.raw,
+    meta: {
+      mode: "raw",
+      prompt_version: result.prompt_version,
+      model: result.model,
+      duration_ms: result.duration_ms,
+    },
   });
 });
 
