@@ -1,0 +1,19 @@
+{
+  "name": "week-seven-llm-api",
+  "version": "1.0.0",
+  "description": "Week 7 API endpoint that asks an LLM to triage support messages with validated JSON output.",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env src/server.js",
+    "start:stub": "LLM_STUB=1 node --env-file=.env.example src/server.js",
+    "hello": "node --env-file=.env src/llm/hello.js",
+    "eval": "LLM_STUB=1 node --env-file=.env.example scripts/eval.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "openai": "^4.77.0",
+    "zod": "^3.24.1"
+  }
+}
