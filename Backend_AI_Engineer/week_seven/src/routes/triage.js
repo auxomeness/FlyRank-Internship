@@ -6,11 +6,11 @@ import {
   triageInputSchema,
   triageOutputSchema,
 } from "../llm/schema.js";
-import { completeTriageRaw } from "../llm/client.js";
+import { generateTriage } from "../llm/triage.js";
 
 const router = express.Router();
 
-router.post("/triage", async (req, res) => {
+router.post("/triage", async (req, res, next) => {
   const input = triageInputSchema.safeParse(req.body);
 
   if (!input.success) {
@@ -40,17 +40,22 @@ router.post("/triage", async (req, res) => {
     });
   }
 
-  const result = await completeTriageRaw(input.data.message);
+  try {
+    const result = await generateTriage(input.data.message);
+    return res.json({
+      ...result.output,
+      meta: result.meta,
+    });
+  } catch (error) {
+    if (error.statusCode === 422) {
+      return res.status(422).json({
+        error: "Model output did not match the required schema",
+        details: error.details,
+      });
+    }
 
-  return res.json({
-    raw_model_output: result.raw,
-    meta: {
-      mode: "raw",
-      prompt_version: result.prompt_version,
-      model: result.model,
-      duration_ms: result.duration_ms,
-    },
-  });
+    return next(error);
+  }
 });
 
 export default router;

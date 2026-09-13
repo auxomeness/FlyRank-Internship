@@ -15,17 +15,24 @@ export const createClient = () =>
     maxRetries: 0,
   });
 
-export const completeTriageRaw = async (message) => {
+export const completeTriageRaw = async (message, repair = null) => {
   const client = createClient();
   const systemPrompt = await loadSystemPrompt();
   const started = Date.now();
+  const userPayload = repair
+    ? {
+        message,
+        rejected_output: repair.rejectedOutput,
+        repair_instruction: repair.repairInstruction,
+      }
+    : { message };
 
   const response = await client.chat.completions.create({
     model: process.env.LLM_MODEL,
     temperature: 0,
     messages: [
       { role: "system", content: systemPrompt },
-      { role: "user", content: JSON.stringify({ message }) },
+      { role: "user", content: JSON.stringify(userPayload) },
     ],
   });
 
@@ -35,5 +42,6 @@ export const completeTriageRaw = async (message) => {
     duration_ms: Date.now() - started,
     model: process.env.LLM_MODEL,
     prompt_version: PROMPT_VERSION,
+    repair: Boolean(repair),
   };
 };
