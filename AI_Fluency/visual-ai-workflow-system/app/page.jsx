@@ -140,6 +140,9 @@ export default function Home() {
       const payload = await response.json();
       setExecution(payload);
       setIsRunning(payload.status === "queued" || payload.status === "running");
+      if (!["queued", "running"].includes(payload.status)) {
+        setExecutionId(null);
+      }
 
       setNodes((current) =>
         current.map((node) => {
