@@ -1,0 +1,17 @@
+{
+  "name": "week-eight-pdf-report-generator",
+  "version": "1.0.0",
+  "description": "Week 8 background job that queries SQLite data and generates a downloadable PDF report.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "demo": "node scripts/demo.js",
+    "clean": "node scripts/clean.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "express": "^5.2.1"
+  }
+}
